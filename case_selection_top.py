@@ -14,8 +14,16 @@ def build(root: AsyncTk, pool_factor=1):
     cst = Toplevel(root)
     cst.geometry("640x480")
     cst.title("Select case")
+    cst.grid_columnconfigure(0, weight=1)
+    cst.grid_columnconfigure(1, weight=0)
+    cst.grid_columnconfigure(2, weight=1)
+    cst.grid_rowconfigure(0, weight=1)
+    cst.grid_rowconfigure(1, weight=0)
+    cst.grid_rowconfigure(2, weight=0)
+    cst.grid_rowconfigure(3, weight=0)
+    cst.grid_rowconfigure(4, weight=1)
     cst_wait_label = Label(cst, text='Wait while connecting to GDrive')
-    cst_wait_label.pack()
+    cst_wait_label.pack(expand=1, fill="both")
     root.store.available_cases = []
     root.add_task(connect_to_gdrive(root))
 
@@ -31,13 +39,13 @@ def display_listbox(root, cst, pool_factor):
     for child in cst.winfo_children():
         child.destroy()
     cst_title = Label(cst, text="Select the case to load.")
-    choicesvar = StringVar(value=root.store.available_cases)
+    choicesvar = StringVar(value=sorted(root.store.available_cases))
     listbox = Listbox(cst, listvariable=choicesvar)
     cst_load_button = Button(cst, text="Load selected case",
                              command=partial(load_selected, root.store, cst, listbox, pool_factor))
-    cst_title.pack()
-    listbox.pack()
-    cst_load_button.pack()
+    cst_title.grid(column=1, row=1)
+    listbox.grid(column=1, row=2)
+    cst_load_button.grid(column=1, row=3)
 
 
 def load_selected(store, cst, listbox, pool_factor):
@@ -45,7 +53,7 @@ def load_selected(store, cst, listbox, pool_factor):
     for child in cst.winfo_children():
         child.destroy()
     label = Label(cst, text=f"Downloading {case}...")
-    label.pack()
+    label.pack(expand=1, fill="both")
     # DEBUG
     # files = [1, 2, 3, 4, 5]
     # REAL
