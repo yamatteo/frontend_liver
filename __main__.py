@@ -1,7 +1,4 @@
-import asyncio
+from . import main
 
-from . import build_root
+main()
 
-root = build_root()
-root.update()
-asyncio.run(root.tk_loop())
