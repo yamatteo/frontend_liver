@@ -4,23 +4,52 @@ from pathlib import Path
 from sys import platform
 from tkinter import *
 from tkinter import filedialog
-
+import multiprocessing as mp
 import numpy as np
+import tkinter as tk
 
 from . import case_selection_top, canvas as canvas_module, nibabelio
 from .asynctk import AsyncTk
 from .shared_tasks import SharedNdarray
 from . import pydrive_utils as pu
+from .store import SharedBooleanVar
 
 pool_factor = 2
 
-def main():
-    root = build_root()
-    root.update()
-    asyncio.run(root.tk_loop())
+def spawner(f, *args, **kwargs):
+    def _f():
+        mp.Process(target=f, args=args, kwargs=kwargs).start()
+    return _f
+
+def event_callback(f):
+    def _f(a, b, c):
+        f()
+    return _f
 
 def build_root():
-    root = AsyncTk()
+    root = tk.Tk()
+
+    # root.geometry("1280x800")
+    root.minsize(1280, 800)
+
+
+    bvar1 = SharedBooleanVar(root)
+
+    def click(value):
+        bvar1.set(value)
+
+    l = tk.Label(root, text="Waiting")
+    l.pack()
+
+    tk.Button(root, text="Flip", command=spawner(click, True)).pack()
+    @event_callback
+    def set_label():
+        l.config(text=f"BVar1 is {bvar1.get()}.")
+        root.update()
+
+    bvar1.trace_add("write", set_label)
+
+    return root
     store = root.store
     store.height = 0
 
