@@ -14,11 +14,6 @@ from . import pydrive_utils as pu
 
 pool_factor = 2
 
-def main():
-    root = build_root()
-    root.update()
-    asyncio.run(root.tk_loop())
-
 def build_root():
     root = AsyncTk()
     store = root.store

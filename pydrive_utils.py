@@ -1,16 +1,39 @@
 import functools
 import random
 from dataclasses import dataclass, field
+from pathlib import Path
 from typing import Callable, Union, Iterator, List
 
 from pydrive.auth import GoogleAuth
 from pydrive.drive import GoogleDrive
 from pydrive.files import GoogleDriveFile
 
-gauth = GoogleAuth()
-gauth.settings["client_config_file"] = "frontend_liver/client_secrets.json"
-gauth.LocalWebserverAuth()
-drive = GoogleDrive(gauth)
+from .main import args
+
+PathLike = Union[str, List[str], "AbstractPath", "DrivePath", "Path"]
+drive = ...
+
+class MockDrive:
+    def ListFile(self, *args, **kwargs):
+        return [self.CreateFile() for name in ["file1", "file2", "file3"]]
+
+    def CreateFile(self, *args, **kwargs):
+        return dict()
+
+
+def setup(path: Path=None, debug=False):
+    global drive
+    if debug:
+        print("Using mock drive.")
+        drive = MockDrive()
+        return
+    if path is None:
+        this_file = Path(__file__)
+        path = this_file.parent
+    gauth = GoogleAuth()
+    gauth.settings["client_config_file"] = str(path / "client_secrets.json")
+    gauth.LocalWebserverAuth()
+    drive = GoogleDrive(gauth)
 
 PathLike = Union[str, List[str], "AbstractPath", "DrivePath", "Path"]
 

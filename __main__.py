@@ -1,4 +1,8 @@
-from . import main
+from . import build_root
+from .pydrive_utils import setup
+from .main import main, parser
 
-main()
+args = parser.parse_args()
+setup(debug=args.debug)
+main(build_root)
 
