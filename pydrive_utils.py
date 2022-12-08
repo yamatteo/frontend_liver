@@ -8,24 +8,25 @@ from pydrive.auth import GoogleAuth
 from pydrive.drive import GoogleDrive
 from pydrive.files import GoogleDriveFile
 
-from .main import args
-
 PathLike = Union[str, List[str], "AbstractPath", "DrivePath", "Path"]
 drive = ...
 
+
 class MockDrive:
+    tmpdir = Path("/home/yamatteo/tmpdir")
+
     def ListFile(self, *args, **kwargs):
-        return [self.CreateFile() for name in ["file1", "file2", "file3"]]
+        return [self.CreateFile(id=0, title=file.name) for file in self.tmpdir.iterdir()]
 
-    def CreateFile(self, *args, **kwargs):
-        return dict()
+    def CreateFile(self, arg=None, **kwargs):
+        if arg is None:
+            arg = {}
+        return dict(arg, **kwargs)
 
 
-def setup(path: Path=None, debug=False):
+def connect(path: Path = None, mock=False):
     global drive
-    if debug:
-        print("Using mock drive.")
-        drive = MockDrive()
+    if mock:
         return
     if path is None:
         this_file = Path(__file__)
@@ -34,6 +35,7 @@ def setup(path: Path=None, debug=False):
     gauth.settings["client_config_file"] = str(path / "client_secrets.json")
     gauth.LocalWebserverAuth()
     drive = GoogleDrive(gauth)
+
 
 @dataclass
 class AbstractPath:
