@@ -13,10 +13,12 @@ def load_ndarray(file_path: Path) -> np.ndarray:
 
 
 def save_segmentation(segm: np.ndarray, case_path: Path):
-    affine, _, _, _ = load_registration_data(case_path)
+    affine, bottom, top, height = load_registration_data(case_path)
+    background = np.zeros([*segm.shape[:-1], height])
+    background[..., bottom:top] = segm
     nibabel.save(
         nibabel.Nifti1Image(
-            segm,
+            background,
             affine=affine
         ),
         case_path / "segmentation.nii.gz",
