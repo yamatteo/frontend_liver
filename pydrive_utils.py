@@ -135,7 +135,7 @@ class DrivePath(AbstractPath):
         except (AssertionError, FileNotFoundError):
             return False
 
-    def iterdir(self):
+    def iterdir(self) -> Iterator["DrivePath"]:
         self.resolve()
         for obj in drive.ListFile({'q': f"'{self.id}' in parents and trashed=false"}).GetList():
             yield DrivePath(self.parts + [obj.metadata["title"]], root=self.root, obj=obj)
@@ -237,15 +237,17 @@ def is_trainable(path: DrivePath) -> bool:
 def discover(path: DrivePath, select_dir: Callable = is_anything) -> list[DrivePath]:
     """Recursively list dirs in `path` that respect `select_dir` criterion."""
     unexplored_paths = [path]
-    selected_paths = []
+    # selected_paths = []
     while len(unexplored_paths) > 0:
         new_path = unexplored_paths.pop(0)
         if select_dir(new_path):
-            selected_paths.append(new_path)
+            # selected_paths.append(new_path)
+            yield new_path
         elif new_path.is_dir():
-            unexplored_paths.extend(new_path.iterdir())
-    selected_paths.sort()
-    return selected_paths
+            # unexplored_paths.extend(new_path.iterdir())
+            unexplored_paths.extend(sorted(new_path.iterdir()))
+    # selected_paths.sort()
+    # return selected_paths
 
 
 # Iterators
